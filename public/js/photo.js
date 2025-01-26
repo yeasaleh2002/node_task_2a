@@ -55,12 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const preview = document.getElementById('preview');
     const saveBtn = document.getElementById('save-btn');
 
-    // Fetch and display the latest photo
     fetchPhoto(preview);
-
-    // Preview selected photo
     fileInput.addEventListener('change', () => previewPhoto(fileInput, preview, saveBtn));
-
-    // Upload photo
     saveBtn.addEventListener('click', () => uploadPhoto(fileInput, saveBtn));
 });
