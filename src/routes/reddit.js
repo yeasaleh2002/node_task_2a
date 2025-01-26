@@ -1,14 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios'); // We will use axios to make the HTTP request to Reddit
+const axios = require('axios'); 
 
-// Fetch top 4 even-numbered posts from /r/programming
 router.get('/top-posts', async (req, res) => {
   try {
     const response = await axios.get('https://www.reddit.com/r/programming.json');
     const posts = response.data.data.children;
 
-    // Filter to get the even-numbered posts (2nd, 4th, etc.)
     const evenPosts = posts.filter((_, index) => (index + 1) % 2 === 0).slice(0, 4); // Get top 4 even posts
     
     const result = evenPosts.map(post => ({
