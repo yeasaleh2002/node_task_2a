@@ -15,13 +15,11 @@ router.post('/generate-2fa', (req, res) => {
 
   users[username] = { secret: secret.base32 };
 
-  // Generate a QR code URL for the 2FA app (Google Authenticator, etc.)
   qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
     if (err) {
       return res.status(500).json({ message: 'Error generating QR code' });
     }
 
-    // Return the secret and the QR code
     res.json({
       secret: secret.base32,
       qrCodeUrl: data_url,
@@ -29,18 +27,15 @@ router.post('/generate-2fa', (req, res) => {
   });
 });
 
-// Route to verify 2FA token
 router.post('/verify-2fa', (req, res) => {
   const { username, token } = req.body;
 
-  // Retrieve the user's secret from the simulated "database"
   const user = users[username];
 
   if (!user) {
     return res.status(400).json({ message: 'User not found' });
   }
 
-  // Verify the token using the secret
   const isValid = speakeasy.totp.verify({
     secret: user.secret,
     encoding: 'base32',
