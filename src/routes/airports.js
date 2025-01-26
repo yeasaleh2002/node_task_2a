@@ -19,10 +19,10 @@ router.get('/airports', async (req, res) => {
         const airports = await Airport.findAll({
             where: {
                 name: {
-                    [Sequelize.Op.like]: `%${searchTerm}%`, // Use Sequelize operators
+                    [Sequelize.Op.like]: `%${searchTerm}%`, 
                 },
             },
-            attributes: ['id', 'name', 'code', 'latitude', 'longitude'], // Return only necessary fields
+            attributes: ['id', 'name', 'code', 'latitude', 'longitude'], 
         });
 
         res.json(airports);
