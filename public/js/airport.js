@@ -15,12 +15,15 @@ window.onload = () => {
    */
   const fetchAirports = async (search) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/airports/airports?search=${search}`);
-      if (!response.ok) throw new Error(`Failed to fetch airports: ${response.statusText}`);
+      const response = await fetch(
+        `http://localhost:3000/api/airports/airports?search=${search}`
+      );
+      if (!response.ok)
+        throw new Error(`Failed to fetch airports: ${response.statusText}`);
       const data = await response.json();
-      return data; 
+      return data;
     } catch (error) {
-      console.error('Error fetching airports:', error);
+      console.error("Error fetching airports:", error);
       return [];
     }
   };
@@ -36,10 +39,10 @@ window.onload = () => {
       if (airports.length > 0) {
         displayAirports(airports);
       } else {
-        resultsList.innerHTML = '<li>No results found</li>';
+        resultsList.innerHTML = "<li>No results found</li>";
       }
     } else {
-      resultsList.innerHTML = '';
+      resultsList.innerHTML = "";
     }
   };
 
@@ -73,7 +76,7 @@ window.onload = () => {
    */
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a =
@@ -95,9 +98,6 @@ window.onload = () => {
       const lat = parseFloat(e.target.dataset.lat);
       const lon = parseFloat(e.target.dataset.lon);
 
-      // Show the map
-      mapDiv.classList.remove("hidden");
-
       // Calculate and show distance
       const arcticCircleLat = 66.5628;
       const arcticCircleLon = 0; // Prime Meridian
@@ -114,8 +114,9 @@ window.onload = () => {
       )} KM`;
       distanceCard.classList.remove("hidden");
 
+      // Show the map
+      mapDiv.classList.remove("hidden");
       if (!map) {
-        // Initialize OpenLayers map if not already initialized
         map = new ol.Map({
           target: "map",
           layers: [
@@ -133,7 +134,6 @@ window.onload = () => {
         map.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
         map.getView().setZoom(10);
       }
-
     }
   };
 
