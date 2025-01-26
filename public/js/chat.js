@@ -39,4 +39,4 @@ const sendMessage = async () => {
   input.value = '';
 };
 
-// pollChat(); 
+pollChat(); 
