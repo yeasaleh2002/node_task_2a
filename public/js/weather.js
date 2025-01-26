@@ -1,10 +1,8 @@
 const updateWeather = async () => {
-  // Get the user's current location using the Geolocation API
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(async (position) => {
       const { latitude, longitude } = position.coords;
 
-      // Fetch weather data based on the current location
       const response = await fetch(`/api/weather?lat=${latitude}&lon=${longitude}`);
       const data = await response.json();
 
