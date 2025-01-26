@@ -18,7 +18,7 @@ window.onload = () => {
       const response = await fetch(`http://localhost:3000/api/airports/airports?search=${search}`);
       if (!response.ok) throw new Error(`Failed to fetch airports: ${response.statusText}`);
       const data = await response.json();
-      return data; // List of airports
+      return data; 
     } catch (error) {
       console.error('Error fetching airports:', error);
       return [];
@@ -39,7 +39,7 @@ window.onload = () => {
         resultsList.innerHTML = '<li>No results found</li>';
       }
     } else {
-      resultsList.innerHTML = ''; // Clear results if search length < 3
+      resultsList.innerHTML = '';
     }
   };
 
