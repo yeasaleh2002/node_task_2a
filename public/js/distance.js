@@ -1,5 +1,3 @@
-// distance.js
-
 async function calculateDistance() {
     const airport = document.getElementById("airport-dropdown").value;
     const response = await fetch(`/distance?airport=${airport}`);

@@ -97,7 +97,6 @@
           .then(data => {
             let resultText = "";
             for (const [denomination, count] of Object.entries(data)) {
-              // Format result as: 2 x $20 bill
               resultText += `${count} x ${denomination}\n`;
             }
             document.getElementById("coin-result").textContent = resultText;
