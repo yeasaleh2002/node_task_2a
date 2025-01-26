@@ -3,7 +3,7 @@ const router = express.Router();
 const axios = require("axios");
 
 router.get("/", async (req, res) => {
-  const { lat, lon } = req.query; // Get latitude and longitude from the query parameters
+  const { lat, lon } = req.query; 
   if (!lat || !lon) {
     return res.status(400).json({ error: "Latitude and Longitude are required" });
   }
