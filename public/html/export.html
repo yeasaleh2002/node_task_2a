@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Export</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f3f4f6;
+        margin: 0;
+      }
+      .card {
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        padding: 16px;
+        background: white;
+        text-align: center;
+        width: 300px;
+      }
+      .btn {
+        margin-top: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .btn:hover {
+        background-color: #0056b3;
+      }
+      .count {
+        margin-top: 16px;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Number of Clicks Card -->
+    <div
+      style="
+        background-color: #f3f4f6;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 2px solid #d1d5db;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      "
+    >
+      <h4
+        style="
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          text-align: center;
+        "
+      >
+        Number of Clicks
+      </h4>
+      <div
+        id="total-analytics"
+        style="text-align: center; font-size: 2.625rem; font-weight: 700"
+      >
+        Loading total analytics...
+      </div>
+    </div>
+
+    <!-- Export XML Card -->
+    <div
+      style="
+        background-color: #f3f4f6;
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        border-radius: 0.75rem;
+        border: 2px solid #d1d5db;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+      "
+    >
+      <h4
+        style="
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          text-align: center;
+        "
+      >
+        Export XML
+      </h4>
+      <button
+        id="export-btn"
+        style="
+          background-color: #3b82f6;
+          color: white;
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          cursor: pointer;
+        "
+      >
+        Export
+      </button>
+    </div>
+
+    <script>
+      async function fetchAnalyticsCount() {
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/analytics/count"
+          );
+          const data = await response.json();
+          document.getElementById(
+            "total-analytics"
+          ).textContent = `Total Analytics: ${data.count ? data.count : 0}`;
+        } catch (error) {
+          document.getElementById("total-analytics").textContent =
+            "Error loading analytics count";
+          console.error("Error fetching analytics count:", error);
+        }
+      }
+
+      async function exportAnalyticsToXML() {
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/analytics/export"
+          );
+          const xmlData = await response.text();
+
+          const blob = new Blob([xmlData], { type: "application/xml" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "analytics.xml";
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("Error exporting analytics:", error);
+          alert("Failed to export analytics");
+        }
+      }
+
+      document
+        .getElementById("export-btn")
+        .addEventListener("click", exportAnalyticsToXML);
+
+      fetchAnalyticsCount();
+    </script>
+  </body>
+</html>

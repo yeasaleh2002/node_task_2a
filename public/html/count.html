@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Count</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f3f4f6;
+        margin: 0;
+      }
+      .card {
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        padding: 16px;
+        background: white;
+        text-align: center;
+        width: 300px;
+      }
+      .count {
+        font-size: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Count Coins Card -->
+    <div
+      style="
+        background-color: #f3f4f6;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 2px solid #d1d5db;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      "
+    >
+      <h4
+        style="
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          text-align: center;
+        "
+      >
+        Count Coins
+      </h4>
+      <input
+        type="number"
+        id="coin-input"
+        placeholder="Enter amount"
+        style="margin-bottom: 1rem; padding: 0.5rem"
+      />
+      <button
+        id="calculate-coins-btn"
+        style="
+          background-color: #3b82f6;
+          color: white;
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          cursor: pointer;
+        "
+      >
+        Calculate
+      </button>
+      <div
+        id="coin-result"
+        style="
+          text-align: left;
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-top: 1rem;
+          white-space: pre-line;
+        "
+      ></div>
+    </div>
+
+    <script>
+      document.getElementById("calculate-coins-btn").addEventListener("click", function() {
+        const amount = document.getElementById("coin-input").value;
+
+        // Send the amount to the backend API to calculate the coins
+        fetch("http://localhost:3000/api/coin/calculate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ amount: amount })
+        })
+          .then(response => response.json())
+          .then(data => {
+            let resultText = "";
+            for (const [denomination, count] of Object.entries(data)) {
+              // Format result as: 2 x $20 bill
+              resultText += `${count} x ${denomination}\n`;
+            }
+            document.getElementById("coin-result").textContent = resultText;
+          })
+          .catch(error => {
+            document.getElementById("coin-result").textContent = "Error calculating coins.";
+            console.error("Error:", error);
+          });
+      });
+    </script>
+  </body>
+</html>
