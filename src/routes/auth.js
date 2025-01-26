@@ -3,20 +3,16 @@ const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const router = express.Router();
 
-// Simulate a "database" (you can use actual DB in real use cases)
 const users = {};
 
-// Route to generate 2FA secret and QR code URL
 router.post('/generate-2fa', (req, res) => {
   const { username } = req.body;
 
-  // Generate a new secret key for the user
   const secret = speakeasy.generateSecret({
     name: username + '@myapp', // Customize based on your app
     length: 20,
   });
 
-  // Store the secret in the simulated "database"
   users[username] = { secret: secret.base32 };
 
   // Generate a QR code URL for the 2FA app (Google Authenticator, etc.)
