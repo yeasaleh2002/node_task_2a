@@ -14,4 +14,4 @@ const updateRedditFeed = async () => {
 };
 
 updateRedditFeed();
-setInterval(updateRedditFeed, 300000); // Update every 5 minutes 
+setInterval(updateRedditFeed, 300000); 
