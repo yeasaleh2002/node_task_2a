@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 router.post('/calculate', (req, res) => {
-  let amount = parseFloat(req.body.amount) * 100; // Convert to cents
+  let amount = parseFloat(req.body.amount) * 100; 
   const denominations = {
     '$20 bills': 2000,
     '$10 bill': 1000,
