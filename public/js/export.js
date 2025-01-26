@@ -1,4 +1,3 @@
-// export.js
 
 async function exportXml() {
     const response = await fetch('/export-xml');
