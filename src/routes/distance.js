@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Radius of Earth in km
+  const R = 6371; 
   const φ1 = lat1 * Math.PI / 180;
   const φ2 = lat2 * Math.PI / 180;
   const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -12,7 +12,7 @@ function haversine(lat1, lon1, lat2, lon2) {
             Math.cos(φ1) * Math.cos(φ2) *
             Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in km
+  return R * c; 
 }
 
 router.get('/distance', (req, res) => {
@@ -25,7 +25,7 @@ router.get('/distance', (req, res) => {
   };
 
   if (airportData[airport]) {
-    const arcticCircleLat = 66.5633; // Latitude of Arctic Circle
+    const arcticCircleLat = 66.5633; 
     const arcticCircleLon = 0;
     const { latitude, longitude } = airportData[airport];
     const distance = haversine(arcticCircleLat, arcticCircleLon, latitude, longitude);
