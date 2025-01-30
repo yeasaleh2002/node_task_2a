@@ -22,6 +22,7 @@ const models = {
   Time: require("./time")(sequelize),
   Airport: require("./airport")(sequelize),
   User: require("./auth")(sequelize),
+  StripeSubscription: require("./StripeSubscription")(sequelize),
 };
 
 module.exports = {

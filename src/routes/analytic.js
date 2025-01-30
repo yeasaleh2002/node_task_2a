@@ -3,6 +3,9 @@ const router = express.Router();
 const { Analytics } = require("../models");
 const { js2xml } = require("xml-js");
 const rateLimit = require("express-rate-limit");
+const xml2js = require("xml2js");
+const multer = require("multer");
+const upload = multer();
 
 // Create a rate limiter for the analytics routes
 const analyticsRateLimiter = rateLimit({
@@ -21,6 +24,60 @@ router.post("/", async (req, res) => {
     res.status(201).json(analytic);
   } catch (error) {
     res.status(500).json({ message: "Error logging analytic", error });
+  }
+});
+
+// Import API
+router.post("/import", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  try {
+    // Convert uploaded file to string
+    const xmlData = req.file.buffer.toString();
+    console.log("Uploaded XML Data:", xmlData); // Log raw XML for debugging
+
+    // Parse XML to JSON
+    const parsedData = await xml2js.parseStringPromise(xmlData, {
+      explicitArray: false, // Prevent arrays for single elements
+      trim: true, // Trim whitespace
+      mergeAttrs: true, // Merge attributes into objects
+    });
+    console.log("Parsed XML Data:", parsedData); // Log parsed JSON for debugging
+
+    // Validate the structure of the parsed data
+    if (!parsedData.analytics || !parsedData.analytics.analytic) {
+      return res.status(400).json({ message: "Invalid XML format" });
+    }
+
+    // Ensure analytics.analytic is an array
+    const analyticsArray = Array.isArray(parsedData.analytics.analytic)
+      ? parsedData.analytics.analytic
+      : [parsedData.analytics.analytic];
+
+    // Map through the analytics data to ensure required fields exist
+    const formattedAnalytics = analyticsArray.map((item) => {
+      const { widget_name, browser_type, created_at } = item;
+      if (!widget_name || !browser_type || !created_at) {
+        throw new Error("Missing required fields in one of the analytics entries");
+      }
+      return { widget_name, browser_type, created_at };
+    });
+
+    // Save data to the database or perform additional processing here
+    console.log("Formatted Analytics Data:", formattedAnalytics);
+
+    res.status(200).json({
+      message: "Analytics imported successfully",
+      data: formattedAnalytics,
+    });
+  } catch (error) {
+    console.error("Error processing XML file:", error.message);
+    res.status(400).json({
+      message: "Error processing XML file",
+      error: error.message,
+    });
   }
 });
 

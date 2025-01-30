@@ -35,10 +35,6 @@
       .btn:hover {
         background-color: #0056b3;
       }
-      .count {
-        margin-top: 16px;
-        font-size: 1.2rem;
-      }
     </style>
   </head>
   <body>
@@ -73,14 +69,11 @@
       </div>
     </div>
 
-    <!-- Export XML Card -->
+    <!-- Export and Import Cards -->
     <div
       style="
         background-color: #f3f4f6;
-        padding-left: 40px;
-        padding-right: 40px;
-        padding-top: 20px;
-        padding-bottom: 20px;
+        padding: 20px;
         border-radius: 0.75rem;
         border: 2px solid #d1d5db;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -98,7 +91,7 @@
           text-align: center;
         "
       >
-        Export XML
+        Export and Import Analytics
       </h4>
       <button
         id="export-btn"
@@ -108,9 +101,28 @@
           padding: 0.75rem 1.5rem;
           border-radius: 0.5rem;
           cursor: pointer;
+          margin-bottom: 20px;
         "
       >
-        Export
+        Export XML
+      </button>
+      <input
+        type="file"
+        id="import-file"
+        style="display: none;"
+        accept=".xml"
+      />
+      <button
+        id="import-btn"
+        style="
+          background-color: #10b981;
+          color: white;
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          cursor: pointer;
+        "
+      >
+        Import XML
       </button>
     </div>
 
@@ -123,7 +135,7 @@
           const data = await response.json();
           document.getElementById(
             "total-analytics"
-          ).textContent = `Total Analytics: ${data.count ? data.count : 0}`;
+          ).textContent = `Total Analytics: ${data.count || 0}`;
         } catch (error) {
           document.getElementById("total-analytics").textContent =
             "Error loading analytics count";
@@ -151,9 +163,46 @@
         }
       }
 
+      async function importAnalyticsFromXML(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/analytics/import",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          if (response.ok) {
+            alert("Analytics imported successfully!");
+            fetchAnalyticsCount();
+          } else {
+            const errorData = await response.json();
+            alert(`Import failed: ${errorData.message}`);
+          }
+        } catch (error) {
+          console.error("Error importing analytics:", error);
+          alert("Failed to import analytics");
+        }
+      }
+
       document
         .getElementById("export-btn")
         .addEventListener("click", exportAnalyticsToXML);
+
+      document.getElementById("import-btn").addEventListener("click", () => {
+        document.getElementById("import-file").click();
+      });
+
+      document.getElementById("import-file").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          importAnalyticsFromXML(file);
+        }
+      });
 
       fetchAnalyticsCount();
     </script>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stripe Payment</title>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+  <h2>Stripe Payment</h2>
+  <div id="card-element"></div>
+  <button id="pay-btn">Pay Now</button>
+  <p id="message"></p>
+
+  <script>
+    const stripe = Stripe("your-public-key-here");
+    let elements = stripe.elements();
+    let cardElement = elements.create("card");
+    cardElement.mount("#card-element");
+
+    document.getElementById("pay-btn").addEventListener("click", async () => {
+      try {
+        // 1️⃣ Create Payment Intent
+        let response = await fetch("http://localhost:3000/api/payment/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: 5000, currency: "usd", userId: 1 }),
+        });
+
+        let data = await response.json();
+        let clientSecret = data.clientSecret;
+        let paymentIntentId = data.paymentIntentId;
+
+        // 2️⃣ Confirm Payment
+        let { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: { card: cardElement },
+        });
+
+        if (error) {
+          document.getElementById("message").innerText = "Payment failed: " + error.message;
+        } else {
+          // 3️⃣ Store Payment in DB
+          await fetch("http://localhost:3000/api/payment/confirm-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paymentIntentId, userId: 1 }),
+          });
+
+          document.getElementById("message").innerText = "Payment successful!";
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("message").innerText = "An error occurred";
+      }
+    });
+  </script>
+</body>
+</html>
