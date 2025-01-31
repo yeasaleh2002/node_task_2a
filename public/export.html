@@ -12,7 +12,7 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-color: #f3f4f6;
+        background-color: #2CADF5;
         margin: 0;
       }
       .card {
@@ -43,12 +43,11 @@
       style="
         background-color: #f3f4f6;
         padding: 1.5rem;
-        border-radius: 0.75rem;
         border: 2px solid #d1d5db;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
         align-items: center;
+        width: 450px;
       "
     >
       <h4
@@ -69,18 +68,16 @@
       </div>
     </div>
 
-    <!-- Export and Import Cards -->
+    <!-- Export -->
     <div
       style="
         background-color: #f3f4f6;
         padding: 20px;
-        border-radius: 0.75rem;
-        border: 2px solid #d1d5db;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
         align-items: center;
         margin-top: 40px;
+        width: 450px;
       "
     >
       <h4
@@ -91,21 +88,45 @@
           text-align: center;
         "
       >
-        Export and Import Analytics
+        Export XML
       </h4>
       <button
         id="export-btn"
         style="
-          background-color: #3b82f6;
+          background-color: #2CADF5;
           color: white;
-          padding: 0.75rem 1.5rem;
-          border-radius: 0.5rem;
+          padding: 1rem 4.5rem;
           cursor: pointer;
           margin-bottom: 20px;
+          border: none;
         "
       >
         Export XML
       </button>
+    </div>
+
+    <!-- Import Cards -->
+    <div
+      style="
+        background-color: #f3f4f6;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+        width: 450px;
+      "
+    >
+    <h4
+    style="
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-align: center;
+    "
+  >
+    Import XML
+  </h4>
       <input
         type="file"
         id="import-file"
@@ -115,11 +136,12 @@
       <button
         id="import-btn"
         style="
-          background-color: #10b981;
+          background-color: #2CADF5;
           color: white;
-          padding: 0.75rem 1.5rem;
+          padding: 1rem 4.5rem;
           border-radius: 0.5rem;
           cursor: pointer;
+          border: none;
         "
       >
         Import XML
@@ -135,7 +157,7 @@
           const data = await response.json();
           document.getElementById(
             "total-analytics"
-          ).textContent = `Total Analytics: ${data.count || 0}`;
+          ).textContent = `${data.count || 0}`;
         } catch (error) {
           document.getElementById("total-analytics").textContent =
             "Error loading analytics count";

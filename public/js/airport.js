@@ -109,9 +109,9 @@ window.onload = () => {
       );
 
       // Display distance in the card
-      distanceText.textContent = `Distance from Arctic Circle: ${distance.toFixed(
+      distanceText.innerHTML = `<h1 style="text-align:center; font-size:48px; font-weight: 600;"> ${distance.toFixed(
         2
-      )} KM`;
+      )} KM </h1>`;
       distanceCard.classList.remove("hidden");
 
       // Show the map
