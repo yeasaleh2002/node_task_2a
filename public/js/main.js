@@ -24,4 +24,15 @@ const trackWidgetClick = async (widgetName) => {
       browser_type: navigator.userAgent
     })
   });
-}; 
+};
+
+// Add click tracking to all widgets
+document.addEventListener('DOMContentLoaded', () => {
+  const widgets = document.querySelectorAll('[data-widget]');
+  widgets.forEach(widget => {
+    widget.addEventListener('click', async () => {
+      const widgetName = widget.dataset.widget;
+      await trackWidgetClick(widgetName);
+    });
+  });
+});
