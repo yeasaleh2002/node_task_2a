@@ -3,65 +3,358 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat Room</title>
+  <title>Chat Application</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .notification-pulse {
+      animation: pulse 1s infinite;
+    }
+  </style>
 </head>
 <body class="bg-gray-100">
   <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Chat Room</h1>
-    <ul id="chat-log" class="bg-white shadow rounded p-4 mb-4 h-64 overflow-y-scroll"></ul>
-    <div class="flex gap-2">
-      <input id="message-input" type="text" placeholder="Type your message..." class="border rounded p-2 flex-1">
-      <button id="send-button" class="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+    <div class="grid grid-cols-4 gap-4 h-[calc(100vh-2rem)]">
+      <!-- Users Sidebar -->
+      <div class="col-span-1 bg-white shadow rounded-lg overflow-hidden">
+        <div class="p-4 bg-gray-50 border-b">
+          <h2 class="text-xl font-bold">Contacts</h2>
+          <p class="text-sm text-gray-600">Your ID: <span id="current-user-id" class="font-mono"></span></p>
+          <button id="new-chat-btn" class="mt-2 w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+            New Chat
+          </button>
+        </div>
+        <div class="overflow-y-auto h-[calc(100vh-10rem)]">
+          <ul id="users-list" class="divide-y"></ul>
+        </div>
+      </div>
+
+      <!-- Main Chat Area -->
+      <div class="col-span-3 bg-white shadow rounded-lg overflow-hidden flex flex-col">
+        <!-- New Chat Form -->
+        <div id="new-chat-form" class="p-4 bg-gray-50 border-b hidden">
+          <h2 class="text-xl font-bold mb-4">Start New Chat</h2>
+          <div class="flex gap-2">
+            <input type="text" id="new-user-id" placeholder="Enter user ID to chat with..." 
+              class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
+            <button id="start-chat-btn" 
+              class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+              Start Chat
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Header -->
+        <div id="chat-header" class="p-4 bg-gray-50 border-b">
+          <h2 class="text-xl font-bold">Select a contact or start a new chat</h2>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chat-log" class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50"></div>
+
+        <!-- Message Input -->
+        <div id="message-input-container" class="p-4 border-t bg-white hidden">
+          <div class="flex gap-2">
+            <input id="message-input" type="text" placeholder="Type your message..." 
+              class="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:border-blue-500">
+            <button id="send-button" 
+              class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors">
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <button id="save-button" class="bg-green-500 text-white px-4 py-2 rounded mt-4">Save Chat</button>
   </div>
 
   <script>
+    // Generate and store user ID if not exists
+    if (!localStorage.getItem('userId')) {
+      localStorage.setItem('userId', 'user_' + Math.random().toString(36).substr(2, 9));
+    }
+    const currentUserId = localStorage.getItem('userId');
+    document.getElementById('current-user-id').textContent = currentUserId;
+
+    // Get DOM elements
+    const usersList = document.getElementById('users-list');
     const chatLog = document.getElementById('chat-log');
+    const chatHeader = document.getElementById('chat-header');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
-    const saveButton = document.getElementById('save-button');
+    const messageInputContainer = document.getElementById('message-input-container');
+    const newChatBtn = document.getElementById('new-chat-btn');
+    const newChatForm = document.getElementById('new-chat-form');
+    const newUserIdInput = document.getElementById('new-user-id');
+    const startChatBtn = document.getElementById('start-chat-btn');
 
-    async function fetchMessages() {
-      const response = await fetch('http://localhost:3000/api/chat/chat/all');
-      const messages = await response.json();
-      chatLog.innerHTML = '';
-      messages.forEach(message => {
-        const li = document.createElement('li');
-        li.textContent = message;
-        chatLog.appendChild(li);
+    let selectedUserId = null;
+    let polling = null;
+    let messagePolling = null;
+    const unreadMessages = new Map();
+
+    // Get chat history from localStorage
+    const getChatHistory = () => {
+      const history = localStorage.getItem('chatHistory');
+      return history ? JSON.parse(history) : [];
+    };
+
+    // Save chat history to localStorage
+    const saveChatHistory = (userId, userName) => {
+      const history = getChatHistory();
+      const existingIndex = history.findIndex(chat => chat.userId === userId);
+      const chatInfo = { userId, userName, lastAccessed: new Date().toISOString() };
+      
+      if (existingIndex !== -1) {
+        history[existingIndex] = chatInfo;
+      } else {
+        history.push(chatInfo);
+      }
+      
+      localStorage.setItem('chatHistory', JSON.stringify(history));
+    };
+
+    // Load users list
+    async function loadUsers() {
+      const chatHistory = getChatHistory();
+      usersList.innerHTML = '';
+      
+      // Add users from chat history
+      chatHistory.forEach(chat => {
+        const hasUnread = unreadMessages.has(chat.userId);
+        addUserToList(chat.userId, chat.userName, chat.lastAccessed, hasUnread);
       });
     }
 
-    async function pollMessages() {
-      while (true) {
-        const response = await fetch('http://localhost:3000/api/chat/poll');
-        if (response.status === 200) {
-          await fetchMessages();
+    // Add user to the list
+    function addUserToList(userId, userName, lastSeen, hasUnread = false) {
+      const li = document.createElement('li');
+      li.className = `p-4 hover:bg-gray-50 cursor-pointer transition-colors 
+        ${selectedUserId === userId ? 'bg-blue-50' : ''} 
+        ${hasUnread ? 'bg-yellow-50' : ''}`;
+      li.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 ${hasUnread ? 'bg-yellow-100 notification-pulse' : 'bg-blue-100'} rounded-full flex items-center justify-center">
+            ${userName ? userName.substring(0, 2).toUpperCase() : userId.substring(0, 2).toUpperCase()}
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <p class="font-medium">${userName || `User ${userId.substring(5, 10)}`}</p>
+              <span class="text-xs text-gray-500">${formatLastSeen(lastSeen)}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-sm text-gray-500 truncate">${userId}</p>
+              ${hasUnread ? `<span class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">${unreadMessages.get(userId)} new</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+      li.addEventListener('click', () => {
+        selectUser(userId, userName || `User ${userId.substring(5, 10)}`);
+        unreadMessages.delete(userId);
+        loadUsers();
+      });
+      usersList.appendChild(li);
+    }
+
+    // Toggle new chat form
+    newChatBtn.addEventListener('click', () => {
+      newChatForm.classList.toggle('hidden');
+      if (!newChatForm.classList.contains('hidden')) {
+        newUserIdInput.focus();
+      }
+    });
+
+    // Start new chat
+    startChatBtn.addEventListener('click', async () => {
+      const newUserId = newUserIdInput.value.trim();
+      if (!newUserId) return;
+
+      // Add to chat history
+      saveChatHistory(newUserId, `User ${newUserId.substring(5, 10)}`);
+      
+      // Select the new user
+      selectUser(newUserId, `User ${newUserId.substring(5, 10)}`);
+      
+      // Clear and hide form
+      newUserIdInput.value = '';
+      newChatForm.classList.add('hidden');
+      
+      // Refresh users list
+      await loadUsers();
+    });
+
+    // Format last seen time
+    function formatLastSeen(timestamp) {
+      if (!timestamp) return 'Never';
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = now - date;
+      
+      if (diff < 60000) return 'Just now';
+      if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+      return date.toLocaleDateString();
+    }
+
+    // Select a user to chat with
+    async function selectUser(userId, userName) {
+      selectedUserId = userId;
+      messageInputContainer.classList.remove('hidden');
+      chatHeader.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            ${userName.substring(0, 2).toUpperCase()}
+          </div>
+          <div>
+            <h2 class="text-xl font-bold">${userName}</h2>
+            <p class="text-sm text-gray-500">${userId}</p>
+          </div>
+        </div>
+      `;
+      await loadChatHistory();
+      if (polling) clearInterval(polling);
+      startPolling();
+      messageInput.focus();
+    }
+
+    // Load chat history
+    async function loadChatHistory() {
+      if (!selectedUserId) return;
+      const response = await fetch(`http://localhost:3000/api/chat/history/${currentUserId}/${selectedUserId}`);
+      const messages = await response.json();
+      displayMessages(messages);
+    }
+
+    // Display messages
+    function displayMessages(messages) {
+      chatLog.innerHTML = '';
+      let lastDate = '';
+      
+      messages.forEach(msg => {
+        const messageDate = new Date(msg.created_at).toLocaleDateString();
+        if (messageDate !== lastDate) {
+          const dateDiv = document.createElement('div');
+          dateDiv.className = 'flex items-center justify-center my-4';
+          dateDiv.innerHTML = `
+            <span class="px-4 py-1 bg-gray-200 rounded-full text-sm text-gray-600">
+              ${messageDate}
+            </span>
+          `;
+          chatLog.appendChild(dateDiv);
+          lastDate = messageDate;
         }
-        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const div = document.createElement('div');
+        const isCurrentUser = msg.sender_id === currentUserId;
+        div.className = `max-w-[70%] ${isCurrentUser ? 'ml-auto' : ''}`;
+        div.innerHTML = `
+          <div class="flex items-end gap-2 ${isCurrentUser ? 'flex-row-reverse' : ''}">
+            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs">
+              ${msg.sender_id.substring(0, 2).toUpperCase()}
+            </div>
+            <div class="${isCurrentUser ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded-lg p-3">
+              <p>${msg.message}</p>
+              <p class="text-xs ${isCurrentUser ? 'text-blue-100' : 'text-gray-500'} mt-1">
+                ${new Date(msg.created_at).toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+        `;
+        chatLog.appendChild(div);
+      });
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // Send message
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message || !selectedUserId) return;
+
+      try {
+        await fetch('http://localhost:3000/api/chat/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message,
+            userId: selectedUserId,
+            senderId: currentUserId
+          }),
+        });
+        messageInput.value = '';
+        await loadChatHistory();
+      } catch (error) {
+        console.error('Error sending message:', error);
       }
     }
 
-    sendButton.addEventListener('click', async () => {
-      const message = messageInput.value;
-      if (!message) return;
-      await fetch('http://localhost:3000/api/chat/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
-      });
-      messageInput.value = '';
+    // Start polling for new messages
+    function startPolling() {
+      polling = setInterval(async () => {
+        if (!selectedUserId) return;
+        const response = await fetch(`http://localhost:3000/api/chat/poll/${currentUserId}/${selectedUserId}`);
+        if (response.status === 200) {
+          await loadChatHistory();
+        }
+      }, 1000);
+    }
+
+    // Event listeners
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
     });
 
-    saveButton.addEventListener('click', async () => {
-      await fetch('http://localhost:3000/api/chat/save', { method: 'POST' });
-      alert('Chat saved to database');
-    });
+    // Check for new messages from any user
+    async function checkNewMessages() {
+      const response = await fetch(`http://localhost:3000/api/chat/check-messages/${currentUserId}`);
+      if (response.status === 200) {
+        const messages = await response.json();
+        messages.forEach(({ message, from }) => {
+          // Add sender to chat history if they're not already there
+          const history = getChatHistory();
+          if (!history.find(chat => chat.userId === from)) {
+            saveChatHistory(from, `User ${from.substring(5, 10)}`);
+            loadUsers(); // Refresh the users list to show the new contact
+          }
 
-    fetchMessages();
-    pollMessages();
+          // If message is from current chat, update chat
+          if (from === selectedUserId) {
+            loadChatHistory();
+          } else {
+            // Otherwise, update unread count
+            const count = unreadMessages.get(from) || 0;
+            unreadMessages.set(from, count + 1);
+            loadUsers(); // Refresh UI to show notification
+            
+            // Show browser notification
+            if (Notification.permission === "granted") {
+              const sender = document.querySelector(`#users-list li[data-user-id="${from}"]`);
+              const senderName = sender ? sender.querySelector('.font-medium').textContent : 'Someone';
+              new Notification("New Message", {
+                body: `${senderName}: ${message.message}`,
+                icon: "/favicon.ico"
+              });
+            }
+          }
+        });
+      }
+    }
+
+    // Initialize
+    loadUsers();
+    setInterval(loadUsers, 30000);
+    messagePolling = setInterval(checkNewMessages, 1000);
+
+    // Request notification permission
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
   </script>
 </body>
 </html>

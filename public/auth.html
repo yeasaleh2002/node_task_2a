@@ -1,81 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2FA Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@1.12.0/dist/full.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2FA Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@1.12.0/dist/full.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="min-h-screen bg-gray-100">
+    <!-- Setup 2FA Modal -->
+    <div
+      id="setup-modal"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
+      <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
+        <h2 class="text-2xl font-semibold mb-4">Setup 2FA Authentication</h2>
 
-  <!-- Dashboard Blocked by 2FA Modal -->
-  <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-white p-8 rounded shadow-xl max-w-sm w-full">
-      <h2 class="text-2xl font-semibold mb-4">Enter 2FA Code</h2>
-      <form id="2fa-form" class="space-y-4">
-        <input type="text" id="2fa-token" placeholder="Enter 2FA Code" class="input input-bordered w-full">
-        <button type="submit" class="btn btn-primary w-full">Verify</button>
-      </form>
-      <div id="error-message" class="text-red-500 mt-2 hidden"></div>
+        <div class="space-y-4">
+          <div class="text-center" id="qr-setup-section">
+            <p class="mb-4">1. Enter your username to get started:</p>
+            <input
+              type="text"
+              id="username-input"
+              placeholder="Enter username"
+              class="input input-bordered w-full mb-4"
+            />
+            <button id="generate-2fa" class="btn btn-primary w-full">
+              Generate 2FA
+            </button>
+          </div>
+
+          <div id="qr-code-section" class="hidden text-center">
+            <p class="mb-4">
+              2. Scan this QR code with your authenticator app:
+            </p>
+            <div id="qr-code" class="mx-auto mb-4"></div>
+            <p class="text-sm text-gray-600 mb-4">
+              Or manually enter this secret code:
+            </p>
+            <code
+              id="secret-code"
+              class="block p-2 bg-gray-100 rounded mb-4 text-sm"
+            ></code>
+            <button id="proceed-to-verify" class="btn btn-primary w-full">
+              Proceed to Verify
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- Dashboard Content (hidden until 2FA is verified) -->
-  <div id="dashboard" class="hidden text-center py-8">
-    <h1 class="text-3xl font-bold">Welcome to the Dashboard</h1>
-    <p>Your 2FA is verified. You can access the content now!</p>
-  </div>
+    <!-- Verify 2FA Modal -->
+    <div
+      id="verify-modal"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"
+    >
+      <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
+        <h2 class="text-2xl font-semibold mb-4">Enter 2FA Code</h2>
+        <form id="2fa-form" class="space-y-4">
+          <p class="text-gray-600">
+            Enter the 6-digit code from your authenticator app:
+          </p>
+          <input
+            type="text"
+            id="2fa-token"
+            placeholder="Enter 2FA Code"
+            class="input input-bordered w-full"
+            maxlength="6"
+          />
+          <button type="submit" class="btn btn-primary w-full">Verify</button>
+        </form>
+        <div id="error-message" class="text-red-500 mt-2 hidden"></div>
+      </div>
+    </div>
 
-  <script>
-    const form = document.getElementById('2fa-form');
-    const tokenInput = document.getElementById('2fa-token');
-    const errorMessage = document.getElementById('error-message');
-    const modal = document.getElementById('modal');
-    const dashboard = document.getElementById('dashboard');
+    <!-- Dashboard Content -->
+    <div id="dashboard" class="hidden p-8">
+      <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-center mb-6">
+          Welcome to the Dashboard
+        </h1>
+        <p class="text-center text-gray-600 mb-8">
+          Your 2FA is verified. You can access the content now!
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Add your dashboard widgets here -->
+        </div>
+      </div>
+    </div>
 
-    // Check if 2FA is verified
-    async function check2FAVerified() {
-      const response = await fetch('http://localhost:3000/api/auth/verify-2fa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'user1', token: '' }),
+    <script>
+      const setupModal = document.getElementById("setup-modal");
+      const verifyModal = document.getElementById("verify-modal");
+      const dashboard = document.getElementById("dashboard");
+      const form = document.getElementById("2fa-form");
+      const tokenInput = document.getElementById("2fa-token");
+      const errorMessage = document.getElementById("error-message");
+      const generateButton = document.getElementById("generate-2fa");
+      const qrCodeSection = document.getElementById("qr-code-section");
+      const qrSetupSection = document.getElementById("qr-setup-section");
+      const proceedToVerifyBtn = document.getElementById("proceed-to-verify");
+      const usernameInput = document.getElementById("username-input");
+      let currentUsername = "";
+
+      // Generate 2FA setup
+      generateButton.addEventListener("click", async () => {
+        currentUsername = usernameInput.value.trim();
+        if (!currentUsername) {
+          alert("Please enter a username");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/auth/generate-2fa",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: currentUsername }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.qrCodeUrl) {
+            document.getElementById(
+              "qr-code"
+            ).innerHTML = `<img src="${data.qrCodeUrl}" alt="QR Code" class="mx-auto">`;
+            document.getElementById("secret-code").textContent = data.secret;
+            qrSetupSection.classList.add("hidden");
+            qrCodeSection.classList.remove("hidden");
+          }
+        } catch (error) {
+          alert("Error generating 2FA setup");
+          console.error(error);
+        }
       });
-      
-      const data = await response.json();
-      if (data.message === '2FA verified successfully!') {
-        dashboard.classList.remove('hidden');
-        modal.classList.add('hidden');
-      } else {
-        modal.classList.remove('hidden');
-        dashboard.classList.add('hidden');
-      }
-    }
 
-    check2FAVerified();
-
-    // Submit the 2FA form
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      
-      const token = tokenInput.value;
-
-      const response = await fetch('http://localhost:3000/api/auth/verify-2fa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'user1', token }),
+      // Proceed to verify after QR code scan
+      proceedToVerifyBtn.addEventListener("click", () => {
+        setupModal.classList.add("hidden");
+        verifyModal.classList.remove("hidden");
       });
-      
-      const data = await response.json();
-      
-      if (data.message === '2FA verified successfully!') {
-        dashboard.classList.remove('hidden');
-        modal.classList.add('hidden');
-      } else {
-        errorMessage.textContent = data.message;
-        errorMessage.classList.remove('hidden');
-      }
-    });
-  </script>
-</body>
+
+      // Submit the 2FA verification form
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const token = tokenInput.value;
+
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/auth/verify-2fa",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: currentUsername, token }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.message === "2FA verified successfully!") {
+            verifyModal.classList.add("hidden");
+            dashboard.classList.remove("hidden");
+            // Store verification status
+            localStorage.setItem("2fa_verified", "true");
+            localStorage.setItem("username", currentUsername);
+          } else {
+            errorMessage.textContent = data.message;
+            errorMessage.classList.remove("hidden");
+          }
+        } catch (error) {
+          errorMessage.textContent = "Error verifying 2FA";
+          errorMessage.classList.remove("hidden");
+          console.error(error);
+        }
+      });
+
+      // Check if 2FA is already verified on page load
+      window.addEventListener("load", () => {
+        const verified = localStorage.getItem("2fa_verified");
+        const savedUsername = localStorage.getItem("username");
+
+        if (verified === "true" && savedUsername) {
+          currentUsername = savedUsername;
+          setupModal.classList.add("hidden");
+          verifyModal.classList.add("hidden");
+          dashboard.classList.remove("hidden");
+        }
+      });
+    </script>
+  </body>
 </html>

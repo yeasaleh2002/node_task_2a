@@ -3,7 +3,9 @@ const updateWeather = async () => {
     navigator.geolocation.getCurrentPosition(async (position) => {
       const { latitude, longitude } = position.coords;
 
-      const response = await fetch(`/api/weather?lat=${latitude}&lon=${longitude}`);
+      const response = await fetch(
+        `/api/weather?lat=${latitude}&lon=${longitude}`
+      );
       const data = await response.json();
 
       const widget = document.getElementById("weather-widget");
@@ -11,8 +13,12 @@ const updateWeather = async () => {
 
       let weatherIcon =
         "https://t4.ftcdn.net/jpg/01/25/86/35/360_F_125863509_jaISqQt7MOfhOT3UxRTHZoEbMmmFYIr8.jpg";
-      if (condition.includes("rain")) weatherIcon = "https://static.vecteezy.com/system/resources/previews/042/146/565/non_2x/ai-generated-beautiful-rain-day-view-photo.jpg";
-      if (condition.includes("snow")) weatherIcon = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjzVb21zkwo4UXanGZSam7VqySOxpUVPVdDw&s";
+      if (condition.includes("rain"))
+        weatherIcon =
+          "https://static.vecteezy.com/system/resources/previews/042/146/565/non_2x/ai-generated-beautiful-rain-day-view-photo.jpg";
+      if (condition.includes("snow"))
+        weatherIcon =
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjzVb21zkwo4UXanGZSam7VqySOxpUVPVdDw&s";
 
       console.log("data", data);
 

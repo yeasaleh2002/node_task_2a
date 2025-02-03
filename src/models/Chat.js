@@ -9,7 +9,15 @@ module.exports = (sequelize) => {
         primaryKey: true,
         autoIncrement: true,
       },
-      chat_messages: {
+      user_id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      sender_id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      message: {
         type: DataTypes.TEXT,
         allowNull: false,
       },
@@ -20,6 +28,11 @@ module.exports = (sequelize) => {
     },
     {
       timestamps: false,
+      indexes: [
+        {
+          fields: ['user_id', 'sender_id']
+        }
+      ]
     }
   );
 };

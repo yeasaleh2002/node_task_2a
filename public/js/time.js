@@ -9,11 +9,10 @@ const updateTimes = async () => {
     // Format the time with the timezone
     const formattedTime = date.toLocaleTimeString('en-US', {
       timeZone: data.timezone,
-      hour12: true,
+      hour12: false,
       hour: 'numeric',
       minute: 'numeric',
       second: 'numeric',
-      timeZoneName: 'short'
     });
     
     element.textContent = `${formattedTime}`;
