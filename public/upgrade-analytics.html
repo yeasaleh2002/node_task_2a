@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade Analytics</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h1 class="text-2xl font-bold text-center mb-6">Upgrade Analytics</h1>
+        <div class="text-center mb-8">
+            <p class="text-gray-600 mb-4">
+                You've reached the free tier limit for analytics tracking.
+                Upgrade now to get unlimited analytics tracking!
+            </p>
+            <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                <h2 class="font-semibold text-lg mb-2">Premium Features:</h2>
+                <ul class="text-left list-disc list-inside">
+                    <li>Unlimited analytics tracking</li>
+                    <li>Real-time widget tracking</li>
+                    <li>Detailed usage reports</li>
+                    <li>Priority support</li>
+                </ul>
+            </div>
+            <div class="text-2xl font-bold text-blue-600 mb-6">$5.00</div>
+        </div>
+        <button
+            id="checkout-button"
+            class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+            Upgrade Now
+        </button>
+    </div>
+
+    <script>
+        const stripe = Stripe('pk_test_51IWQUwH8oljXErmdg6L4MhsuB6tDdmumlHFfyNaopty2U27pmRcqMX1c868zn838lGQtU1eYV6bKRSQtMFWf36VT00aNsvnTOE');
+        const checkoutButton = document.getElementById('checkout-button');
+
+        checkoutButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/stripe/create-checkout-session', {
+                    method: 'POST',
+                });
+                const session = await response.json();
+                
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id,
+                });
+
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Something went wrong. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

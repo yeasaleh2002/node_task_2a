@@ -21,7 +21,7 @@ const models = {
   Photo: require("./photos")(sequelize),
   Time: require("./time")(sequelize),
   Airport: require("./airport")(sequelize),
-  User: require("./auth")(sequelize),
+  User: require("./User")(sequelize),
   StripeSubscription: require("./StripeSubscription")(sequelize),
 };
 

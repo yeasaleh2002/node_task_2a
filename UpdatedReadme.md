@@ -4,7 +4,7 @@
 
 1. Clone repo into your github
 2. Create a page on route / that match the figma file https://www.figma.com/file/wDRDYmVG1qZI3qff32631b/Untitled?node-id=0%3A1
-3. Call the weather api https://www.weatherapi.com/pricing.aspx to show the temperature in celsius and draw a sun if sunny. If its raining show clouds (choose an image from google). If its snowing, choose a snowflake image from google. This widget should update every 5 minute calling teh weather api. Call weather api from backend route. Do error handling.
+3. Call the weather api https://www.weatherapi.com/pricing.aspx to show the temperature in celsius and draw a sun if sunny. If its raining show clouds (choose an image from google). If its snowing, choose a snowflake image from google. This widget should update every 5 minute calling teh weather api. Call weather api from backend route. Do error handling. 
 4. Given the current UTC time, create 4 time widget where you convert the UTC time to local time of london, EST, Nigeria and Pakistan time. Every second, the time should be updated like regular clock. Create backend route to return the time.
 5. Create a widget that call autocomplete api /airports?search= that dropdown the airports that match the search terms partially. Minimum number of character to trigger autocomplete is 3. Create backend route to handle this.
 6. Show map widget for airport chosen using latitude and longitude from autocomplete chosen airport. Use this map api https://openlayers.org/doc/quickstart.html

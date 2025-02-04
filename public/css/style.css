@@ -1,0 +1,77 @@
+/* Global styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navigation */
+nav {
+    background-color: #333;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+}
+
+.nav-link:hover {
+    background-color: #555;
+    border-radius: 4px;
+}
+
+/* Main content */
+main {
+    min-height: calc(100vh - 180px);
+}
+
+/* Footer */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    text-align: center;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.btn:hover {
+    background-color: #2980b9;
+}
+
+/* Error pages */
+.error-container {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.error-code {
+    font-size: 72px;
+    color: #e74c3c;
+    margin-bottom: 1rem;
+}

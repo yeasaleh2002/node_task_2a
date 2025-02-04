@@ -1,0 +1,38 @@
+<%- contentFor('styles') %>
+<style>
+    .dashboard {
+        padding: 20px;
+    }
+    .latest-image {
+        max-width: 300px;
+        margin: 20px 0;
+    }
+</style>
+
+<div class="dashboard">
+    <h1>Welcome to Dashboard</h1>
+    
+    <% if (latestImage) { %>
+        <h2>Latest Upload</h2>
+        <img src="<%= latestImage %>" alt="Latest uploaded image" class="latest-image">
+    <% } %>
+
+    <div class="dashboard-stats">
+        <h2>Quick Stats</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>Total Uploads</h3>
+                <p><%= typeof stats !== 'undefined' ? stats.uploads : 0 %></p>
+            </div>
+            <div class="stat-box">
+                <h3>Active Users</h3>
+                <p><%= typeof stats !== 'undefined' ? stats.users : 0 %></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- contentFor('scripts') %>
+<script>
+    console.log('Dashboard loaded');
+</script>

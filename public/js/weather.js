@@ -26,7 +26,7 @@ const updateWeather = async () => {
       <div>
           <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
             <div>
-              <img src="${weatherIcon}" alt="Weather icon" style="width: 10rem; height: 10rem;" />
+              <img src="${weatherIcon}" alt="Weather icon" style="" />
             </div>
             <span style="font-size: 2.25rem; font-weight: 800; color: #1f2937;">${data.current.temp_c}°C</span>
           </div>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Dashboard' %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <%- typeof style !== 'undefined' ? style : '' %>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/chat" class="nav-link">Chat</a>
+            <a href="/payment" class="nav-link">Payment</a>
+            <a href="/auth" class="nav-link">2FA</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <%- body %>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Your Application. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <%- typeof script !== 'undefined' ? script : '' %>
+</body>
+</html>

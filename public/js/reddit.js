@@ -1,17 +1,23 @@
-const updateRedditFeed = async () => {
-  const response = await fetch('/api/reddit');
-  const posts = await response.json();
-  
-  const feedDiv = document.getElementById('reddit-feed');
-  feedDiv.innerHTML = posts.map(post => `
-    <div class="bg-gray-50 p-4 rounded">
-      <a href="${post.link}" class="text-blue-600 hover:underline" target="_blank">
-        ${post.title}
-      </a>
-      <p class="text-sm text-gray-600">Posted by ${post.author}</p>
-    </div>
-  `).join('');
-};
+ // Fetch the top 4 even-numbered Reddit posts from the API
+ fetch('http://localhost:3000/api/reddit/top-posts')
+ .then(response => response.json())
+ .then(posts => {
+   const postsContainer = document.getElementById('posts');
+   posts.forEach(post => {
+     const postCard = document.createElement('div');
+     postCard.classList.add('post-card');
 
-updateRedditFeed();
-setInterval(updateRedditFeed, 300000); 
+     postCard.innerHTML = `
+     <div>
+     <p>Posted by: ${post.author}</p>
+     <h5>${post.title}</h5>
+       <a style="color: #DEB64B;" href="${post.link}" target="_blank">Read more &#129133;</a>
+     
+     </div>`;
+
+     postsContainer.appendChild(postCard);
+   });
+ })
+ .catch(error => {
+   console.error('Error fetching posts:', error);
+ });

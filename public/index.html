@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
     <link href="/styles/main.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- OpenLayers CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/ol@6.15.2/dist/ol.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/ol@6.15.2/ol.css"
+      rel="stylesheet"
+    />
     <link
       href="https://cdn.jsdelivr.net/npm/ol@6.5.0/ol.css"
       rel="stylesheet"
@@ -26,7 +33,6 @@
         padding: 16px;
         background: white;
         text-align: center;
-        width: 300px;
         margin-top: 20px;
       }
       .card img {
@@ -46,6 +52,51 @@
       .upload-btn:hover {
         background-color: #0056b3;
       }
+      .widget {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 30px;
+      }
+
+      .post-card {
+        background: #fafafa;
+        border: 1px solid #e1e1e1;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        padding: 10px;
+      }
+
+      .post-card h5 {
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+
+      .post-card p {
+        font-size: 0.9rem;
+        color: #555;
+      }
+
+      .post-card a {
+        color: #1d72b8;
+        text-decoration: none;
+      }
+
+      .post-card a:hover {
+        text-decoration: underline;
+      }
+
+      .card {
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        padding: 16px;
+        background: white;
+        text-align: center;
+        width: 300px;
+      }
+      .count {
+        font-size: 1.5rem;
+      }
     </style>
   </head>
   <body
@@ -54,59 +105,338 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
     "
   >
     <div class="container mx-auto p-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Weather Widget -->
-        <div class="bg-[#2CADF5] rounded-lg shadow p-4" id="weather-widget">
-          <div class="weather-content"></div>
-        </div>
-        <!-- Photo Upload Card -->
-        <div class="card">
-          <div id="image-container">
-            <img id="preview" src="logo.png" alt="No Image" />
+      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
+        <div>
+          <!-- Weather Widget -->
+          <div class="mb-4" id="weather-widget">
+            <div class="weather-content"></div>
           </div>
-          <input type="file" id="file-input" style="display: none" />
-          <button
-            class="upload-btn"
-            onclick="document.getElementById('file-input').click()"
-          >
-            Choose Photo
-          </button>
-          <button class="upload-btn" id="save-btn" style="display: none">
-            Upload
-          </button>
-        </div>
-        <!-- Number of Clicks Card -->
-        <div
-          style="
-            background-color: #f3f4f6;
-            padding: 1.5rem;
-            border: 2px solid #d1d5db;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 300px;
-            margin-top: 40px;
-          "
-        >
-          <h4
+          <!-- Number of Clicks Card -->
+          <div
             style="
-              font-size: 1.25rem;
-              font-weight: 600;
-              margin-bottom: 1rem;
-              text-align: center;
+              background-color: #f3f4f6;
+              padding: 1.5rem;
+              border: 2px solid #d1d5db;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
             "
           >
-            Number of Clicks
-          </h4>
+            <h4
+              style="
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              Number of Clicks
+            </h4>
+            <div
+              id="total-analytics"
+              style="text-align: center; font-size: 2.625rem; font-weight: 700"
+            >
+              Loading total analytics...
+            </div>
+          </div>
+
+          <!-- Export -->
           <div
-            id="total-analytics"
-            style="text-align: center; font-size: 2.625rem; font-weight: 700"
+            style="
+              background-color: #f3f4f6;
+              padding: 20px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin-top: 40px;
+            "
           >
-            Loading total analytics...
+            <h4
+              style="
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              Export XML
+            </h4>
+            <button
+              id="export-btn"
+              style="
+                background-color: #2cadf5;
+                color: white;
+                padding: 1rem 4.5rem;
+                cursor: pointer;
+                margin-bottom: 20px;
+                border: none;
+              "
+            >
+              Export XML
+            </button>
+          </div>
+
+          <!-- Import Cards -->
+          <div
+            style="
+              background-color: #f3f4f6;
+              padding: 20px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin-top: 40px;
+            "
+          >
+            <h4
+              style="
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              Import XML
+            </h4>
+            <input
+              type="file"
+              id="import-file"
+              style="display: none"
+              accept=".xml"
+            />
+            <button
+              id="import-btn"
+              style="
+                background-color: #2cadf5;
+                color: white;
+                padding: 1rem 4.5rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                border: none;
+              "
+            >
+              Import XML
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <!-- airport search -->
+          <div class="max-w-lg mx-auto space-y-4">
+            <div class="bg-white p-4 rounded shadow">
+              <h1 class="text-2xl font-bold mb-4">Airport Search</h1>
+              <input
+                id="airport-search"
+                type="text"
+                placeholder="Search airports..."
+                class="input input-bordered w-full p-2 border rounded"
+              />
+              <ul id="airport-results" class="space-y-2"></ul>
+            </div>
+            <!-- Map Container -->
+            <div id="map" class="w-full h-64 border rounded"></div>
+
+            <!-- Distance Card -->
+            <div
+              id="distance-card"
+              class="hidden mt-4 p-4 bg-white shadow rounded"
+            >
+              <h3 class="text-xl font-semibold text-center">
+                Distance from Artic
+              </h3>
+              <p id="distance" class="mt-2 text-gray-700"></p>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <!-- Nigeria Time Card -->
+          <div
+            style="
+              background-color: #f3f4f6;
+              padding: 1.5rem;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            "
+          >
+            <h4
+              style="
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              Nigeria
+            </h4>
+            <div
+              id="nigeria-time"
+              style="text-align: center; font-size: 4.625rem; font-weight: 700"
+            ></div>
+          </div>
+
+          <!-- Pakistan Time Card -->
+          <div
+            style="
+              background-color: #f3f4f6;
+              padding: 1.5rem;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin-top: 1.5rem;
+            "
+          >
+            <h4
+              style="
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              Pakistan
+            </h4>
+            <div
+              id="pakistan-time"
+              style="text-align: center; font-size: 4.625rem; font-weight: 700"
+            ></div>
+          </div>
+
+          <!-- top even posts -->
+          <div class="widget">
+            <h4>Top Even Posts from /r/programming</h4>
+            <div id="posts"></div>
+          </div>
+        </div>
+        <div>
+          <!-- London Time Card -->
+          <div
+            style="
+              background-color: #f3f4f6;
+              padding: 1.5rem;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            "
+          >
+            <h4
+              style="
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              London
+            </h4>
+            <div
+              id="london-time"
+              style="text-align: center; font-size: 4.625rem; font-weight: 700"
+            ></div>
+          </div>
+
+          <!-- EST Time Card -->
+          <div
+            style="
+              background-color: #f3f4f6;
+              padding: 1.5rem;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin-top: 1.5rem;
+            "
+          >
+            <h4
+              style="
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              EST (Eastern Standard Time)
+            </h4>
+            <div
+              id="est-time"
+              style="text-align: center; font-size: 4.625rem; font-weight: 700"
+            ></div>
+          </div>
+          <!-- Count Coins Card -->
+          <div
+            style="
+              background-color: #f3f4f6;
+              padding: 1.5rem;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin-top: 1.5rem;
+            "
+          >
+            <h4
+              style="
+                font-size: 1rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              Count # of coins
+            </h4>
+            <input
+              type="number"
+              id="coin-input"
+              placeholder="Enter amount"
+              style="
+                margin-bottom: 1rem;
+                padding: 0.5rem;
+                width: 90%;
+                height: 2rem;
+              "
+            />
+            <button
+              id="calculate-coins-btn"
+              style="
+                background-color: #2cadf5;
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                border: none;
+                width: 70%;
+                height: 100%;
+              "
+            >
+              Calculate
+            </button>
+            <div
+              id="coin-result"
+              style="
+                text-align: left;
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-top: 1rem;
+                white-space: pre-line;
+              "
+            ></div>
+          </div>
+          <!-- Photo Upload Card -->
+          <div class="card w-full">
+            <div id="image-container">
+              <img id="preview" src="logo.png" alt="No Image" />
+            </div>
+            <input type="file" id="file-input" style="display: none" />
+            <button
+              class="upload-btn"
+              onclick="document.getElementById('file-input').click()"
+            >
+              Choose Photo
+            </button>
+            <button class="upload-btn" id="save-btn" style="display: none">
+              Upload
+            </button>
           </div>
         </div>
       </div>
@@ -114,82 +444,39 @@
 
     <script src="https://cdn.jsdelivr.net/npm/ol@6.5.0/dist/ol.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ol@v7.4.0/dist/ol.js"></script>
+    <script src="/js/analytics.js"></script>
+    <script src="/js/click-counter.js"></script>
     <script>
-      const fileInput = document.getElementById("file-input");
-      const preview = document.getElementById("preview");
-      const saveBtn = document.getElementById("save-btn");
+      // Fetch the top 4 even-numbered Reddit posts from the API
+      fetch("http://localhost:3000/api/reddit/top-posts")
+        .then((response) => response.json())
+        .then((posts) => {
+          const postsContainer = document.getElementById("posts");
+          posts.forEach((post) => {
+            const postCard = document.createElement("div");
+            postCard.classList.add("post-card");
 
-      // Fetch and display the latest image
-      function fetchLatestImage() {
-        fetch("http://localhost:3000/api/upload")
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.imagePath) {
-              preview.src = `http://localhost:3000${data.imagePath}`;
-            } else {
-              preview.src =
-                "https://www.lifewire.com/thmb/TRGYpWa4KzxUt1Fkgr3FqjOd6VQ=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/cloud-upload-a30f385a928e44e199a62210d578375a.jpg";
-            }
-          })
-          .catch((err) => console.error("Error fetching image:", err));
-      }
+            postCard.innerHTML = `
+            <div>
+            <p>Posted by: ${post.author}</p>
+            <h5>${post.title}</h5>
+              <a style="color: #DEB64B;" href="${post.link}" target="_blank">Read more &#129133;</a>
+            
+            </div>`;
 
-      fetchLatestImage();
-
-      async function fetchAnalyticsCount() {
-        try {
-          const response = await fetch(
-            "http://localhost:3000/api/analytics/count"
-          );
-          const data = await response.json();
-          document.getElementById("total-analytics").textContent = `${
-            data.count || 0
-          }`;
-        } catch (error) {
-          document.getElementById("total-analytics").textContent =
-            "Error loading analytics count";
-          console.error("Error fetching analytics count:", error);
-        }
-      }
-
-      fetchAnalyticsCount();
-
-      // Show file preview and enable the upload button
-      fileInput.addEventListener("change", () => {
-        const file = fileInput.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            preview.src = reader.result;
-            saveBtn.style.display = "inline-block";
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-
-      // Upload the photo
-      saveBtn.addEventListener("click", () => {
-        const formData = new FormData();
-        formData.append("photo", fileInput.files[0]);
-
-        fetch("http://localhost:3000/api/upload", {
-          method: "POST",
-          body: formData,
+            postsContainer.appendChild(postCard);
+          });
         })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              alert("Photo uploaded successfully!");
-              saveBtn.style.display = "none";
-              fetchLatestImage();
-            } else {
-              alert("Error uploading photo.");
-            }
-          })
-          .catch((err) => console.error("Error uploading photo:", err));
-      });
+        .catch((error) => {
+          console.error("Error fetching posts:", error);
+        });
     </script>
     <script src="/js/main.js"></script>
     <script src="/js/weather.js"></script>
+    <script src="/js/airport.js"></script>
+    <script src="/js/time.js"></script>
+    <script src="/js/export.js"></script>
+    <script src="/js/count.js"></script>
+    <script src="/js/photo.js"></script>
   </body>
 </html>
