@@ -48,12 +48,13 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('reddit-widget')?.addEventListener('click', () => trackWidgetClick('reddit'));
 
     // Coin Calculator Widget
-    document.getElementById('coin-calculator')?.addEventListener('click', () => trackWidgetClick('coin-calculator'));
+    document.getElementById('calculate-coins-btn')?.addEventListener('click', () => trackWidgetClick('coin-calculator'));
 
     // Upload Widget
-    document.getElementById('upload-widget')?.addEventListener('click', () => trackWidgetClick('upload'));
+    document.getElementById('save-btn')?.addEventListener('click', () => trackWidgetClick('upload'));
 
     // Export/Import Widgets
     document.getElementById('export-btn')?.addEventListener('click', () => trackWidgetClick('export'));
     document.getElementById('import-btn')?.addEventListener('click', () => trackWidgetClick('import'));
+    document.getElementById('posts')?.addEventListener('click', () => trackWidgetClick('reddit'));
 });
