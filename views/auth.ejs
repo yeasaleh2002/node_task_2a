@@ -73,16 +73,21 @@
     }
 
     try {
-      const response = await fetch("/api/auth/generate-2fa", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: currentUsername }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/auth/generate-2fa",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUsername }),
+        }
+      );
 
       const data = await response.json();
 
       if (data.qrCodeUrl) {
-        document.getElementById("qr-code").innerHTML = `<img src="${data.qrCodeUrl}" alt="QR Code" class="mx-auto">`;
+        document.getElementById(
+          "qr-code"
+        ).innerHTML = `<img src="${data.qrCodeUrl}" alt="QR Code" class="mx-auto">`;
         document.getElementById("secret-code").textContent = data.secret;
         qrSetupSection.classList.add("hidden");
         qrCodeSection.classList.remove("hidden");
@@ -106,11 +111,14 @@
     const token = tokenInput.value;
 
     try {
-      const response = await fetch("/api/auth/verify-2fa", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: currentUsername, token }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/auth/verify-2fa",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUsername, token }),
+        }
+      );
 
       const data = await response.json();
 
